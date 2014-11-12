@@ -64,12 +64,29 @@ Time Interval for maximum number of steps: `r maxSteps$interval`
 bad<-is.na(activity$steps)
 totalNA<-sum(bad)
 
-activity.meanStepsDay<-activity[,mean(steps,na.rm = TRUE),by=date]
-bad2 <- is.nan(activity.meanStepsDay$V1)
-activity.meanStepsDay$V1[bad2] <- 0
+activity.imputed<-activity
+activity.meanByDay<-activity[,mean(steps,na.rm = TRUE),by=date]
+activity.meanByDay[is.na(activity.meanByDay)]<-0
 
+for(i in 1:length(activity$steps)){
+  if(bad[i]){ 
+    activity.imputed$steps[i]<-activity.meanByDay[date == activity.imputed$date[i]]$V1
+    }
+  }
+
+activity.imputed.totalSteps<-activity.imputed[,sum(steps,na.rm = TRUE),by=date]
+hist(activity.imputed.totalSteps$V1,breaks=10,main="Histogram of total steps per day over two months",
+     xlab="Total steps per day")
+
+activity.imputed.mean=mean(activity.imputed.totalSteps$V1,na.rm = TRUE)
+activity.imputed.median = median(activity.imputed.totalSteps$V1,na.rm = TRUE)
 ```
 Total number of rows with NAs: `r totalNA`
+
+mean.imputed =  `r activity.imputed.mean`
+
+median.imputed = `r activity.imputed.median`
+
 
 
 ## Are there differences in activity patterns between weekdays and weekends?

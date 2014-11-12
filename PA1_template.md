@@ -25,7 +25,7 @@ library(data.table)
 
 ```r
 activity <- data.table(data)
-activity.totalSteps<-activity[,mean(steps,na.rm = TRUE),by=date]
+activity.totalSteps<-activity[,sum(steps,na.rm = TRUE),by=date]
 hist(activity.totalSteps$V1,breaks=10,main="Histogram of total steps per day over two months",
      xlab="Total steps per day")
 ```
@@ -38,9 +38,9 @@ hist(activity.totalSteps$V1,breaks=10,main="Histogram of total steps per day ove
 activity.mean=mean(activity.totalSteps$V1,na.rm = TRUE)
 activity.median = median(activity.totalSteps$V1,na.rm = TRUE)
 ```
-mean =  37.3825996
+mean =  9354.2295082
 
-median = 37.3784722
+median = 10395
 
 
 ## What is the average daily activity pattern?
@@ -74,8 +74,34 @@ Time Interval for maximum number of steps: 835
 ```r
 bad<-is.na(activity$steps)
 totalNA<-sum(bad)
+
+activity.imputed<-activity
+activity.meanByDay<-activity[,mean(steps,na.rm = TRUE),by=date]
+activity.meanByDay[is.na(activity.meanByDay)]<-0
+
+for(i in 1:length(activity$steps)){
+  if(bad[i]){ 
+    activity.imputed$steps[i]<-activity.meanByDay[date == activity.imputed$date[i]]$V1
+    }
+  }
+
+activity.imputed.totalSteps<-activity.imputed[,sum(steps,na.rm = TRUE),by=date]
+hist(activity.imputed.totalSteps$V1,breaks=10,main="Histogram of total steps per day over two months",
+     xlab="Total steps per day")
+```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+
+```r
+activity.imputed.mean=mean(activity.imputed.totalSteps$V1,na.rm = TRUE)
+activity.imputed.median = median(activity.imputed.totalSteps$V1,na.rm = TRUE)
 ```
 Total number of rows with NAs: 2304
+
+mean.imputed =  9354.2295082
+
+median.imputed = 1.0395\times 10^{4}
+
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
