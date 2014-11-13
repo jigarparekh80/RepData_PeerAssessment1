@@ -9,6 +9,8 @@ output:
 ## Loading and preprocessing the data
 
 ```{r}
+options(scipen=1, digits=2)
+
 unzip("activity.zip")
 data<-read.csv("activity.csv",header = TRUE)
 ```
@@ -81,12 +83,43 @@ hist(activity.imputed.totalSteps$V1,breaks=10,main="Histogram of total steps per
 activity.imputed.mean=mean(activity.imputed.totalSteps$V1,na.rm = TRUE)
 activity.imputed.median = median(activity.imputed.totalSteps$V1,na.rm = TRUE)
 ```
+
+Imputed Stretegy: replace mean by day for missing values 
+
 Total number of rows with NAs: `r totalNA`
 
 mean.imputed =  `r activity.imputed.mean`
 
 median.imputed = `r activity.imputed.median`
 
-
+There is no change in mean & median value because missing value have been replaced by 0. mean for perticular day is 0 due to no avaialbility of data. 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+library(plyr)
+activity.imputed <- mutate(activity.imputed,isWeekend = {
+     (as.POSIXlt(date,format="%Y-%m-%d")$wday %in% c(0,6))})
+
+temp <- split(activity.imputed,activity.imputed$isWeekend)
+activity.weekday <- temp$'FALSE'
+activity.weekend <- temp$'TRUE'
+
+```
+
+Average number of steps taken - Weekday
+
+```{r}
+activity.weekday.AvgStepsInterval <- activity.weekday[,mean(steps,na.rm = TRUE),by=interval]
+plot(activity.weekday.AvgStepsInterval$interval,activity.weekday.AvgStepsInterval$V1, type = 'l',xlab='Time Interval of 5 Min',ylab="Average number of steps taken")
+```
+
+Average number of steps taken - Weekend
+
+```{r}
+activity.weekend.AvgStepsInterval <- activity.weekend[,mean(steps,na.rm = TRUE),by=interval]
+plot(activity.weekend.AvgStepsInterval$interval,activity.weekend.AvgStepsInterval$V1, type = 'l',xlab='Time Interval of 5 Min',ylab="Average number of steps taken")
+
+```
+
+

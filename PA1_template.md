@@ -5,6 +5,8 @@
 
 
 ```r
+options(scipen=1, digits=2)
+
 unzip("activity.zip")
 data<-read.csv("activity.csv",header = TRUE)
 ```
@@ -38,7 +40,7 @@ hist(activity.totalSteps$V1,breaks=10,main="Histogram of total steps per day ove
 activity.mean=mean(activity.totalSteps$V1,na.rm = TRUE)
 activity.median = median(activity.totalSteps$V1,na.rm = TRUE)
 ```
-mean =  9354.2295082
+mean =  9354.23
 
 median = 10395
 
@@ -63,7 +65,7 @@ plot(activity.totalStepsInterval$interval,activity.totalStepsInterval$V1, type =
 maxSteps<-activity.totalStepsInterval[which.max(activity.totalStepsInterval$V1)]
 ```
 
-Maximum number of steps: 206.1698113
+Maximum number of steps: 206.17
 
 Time Interval for maximum number of steps: 835
 
@@ -96,12 +98,55 @@ hist(activity.imputed.totalSteps$V1,breaks=10,main="Histogram of total steps per
 activity.imputed.mean=mean(activity.imputed.totalSteps$V1,na.rm = TRUE)
 activity.imputed.median = median(activity.imputed.totalSteps$V1,na.rm = TRUE)
 ```
+
+Imputed Stretegy: replace mean by day for missing values 
+
 Total number of rows with NAs: 2304
 
-mean.imputed =  9354.2295082
+mean.imputed =  9354.23
 
-median.imputed = 1.0395\times 10^{4}
+median.imputed = 10395
 
-
+There is no change in mean & median value because missing value have been replaced by 0. mean for perticular day is 0 due to no avaialbility of data. 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+
+```r
+library(plyr)
+```
+
+```
+## Warning: package 'plyr' was built under R version 3.1.2
+```
+
+```r
+activity.imputed <- mutate(activity.imputed,isWeekend = {
+     (as.POSIXlt(date,format="%Y-%m-%d")$wday %in% c(0,6))})
+
+temp <- split(activity.imputed,activity.imputed$isWeekend)
+activity.weekday <- temp$'FALSE'
+activity.weekend <- temp$'TRUE'
+```
+
+Average number of steps taken - Weekday
+
+
+```r
+activity.weekday.AvgStepsInterval <- activity.weekday[,mean(steps,na.rm = TRUE),by=interval]
+plot(activity.weekday.AvgStepsInterval$interval,activity.weekday.AvgStepsInterval$V1, type = 'l',xlab='Time Interval of 5 Min',ylab="Average number of steps taken")
+```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
+
+Average number of steps taken - Weekend
+
+
+```r
+activity.weekend.AvgStepsInterval <- activity.weekend[,mean(steps,na.rm = TRUE),by=interval]
+plot(activity.weekend.AvgStepsInterval$interval,activity.weekend.AvgStepsInterval$V1, type = 'l',xlab='Time Interval of 5 Min',ylab="Average number of steps taken")
+```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
+
+
